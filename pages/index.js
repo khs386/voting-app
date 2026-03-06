@@ -6,7 +6,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  useEffect(() => {
+  function loadPolls() {
     fetch('/api/polls')
       .then(r => r.json())
       .then(data => {
@@ -15,7 +15,19 @@ export default function Home() {
         setLoading(false)
       })
       .catch(() => { setError('서버에 연결할 수 없습니다.'); setLoading(false) })
-  }, [])
+  }
+
+  useEffect(() => { loadPolls() }, [])
+
+  async function deletePoll(id) {
+    if (!confirm('이 투표를 삭제하겠습니까?')) return
+    await fetch('/api/polls', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    })
+    loadPolls()
+  }
 
   return (
     <div className="container">
@@ -46,6 +58,9 @@ export default function Home() {
             <Link href={`/result/${poll.id}`}>
               <button className="btn-secondary">결과 보기</button>
             </Link>
+            {!poll.is_active && (
+              <button className="btn-danger" onClick={() => deletePoll(poll.id)}>삭제</button>
+            )}
           </div>
         </div>
       ))}
