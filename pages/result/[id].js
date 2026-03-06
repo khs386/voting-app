@@ -12,7 +12,7 @@ export default function ResultPage() {
 
   function loadResult() {
     if (!id) return
-    fetch(`/api/results/${id}`)
+    fetch(`/api/results/${id}`, { cache: 'no-store' })
       .then(r => r.json())
       .then(data => {
         if (data.error) setError(data.error)
