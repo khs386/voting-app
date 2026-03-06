@@ -4,11 +4,17 @@ import Link from 'next/link'
 export default function Home() {
   const [polls, setPolls] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     fetch('/api/polls')
       .then(r => r.json())
-      .then(data => { setPolls(data); setLoading(false) })
+      .then(data => {
+        if (Array.isArray(data)) setPolls(data)
+        else setError(data.error || '데이터를 불러오지 못했습니다.')
+        setLoading(false)
+      })
+      .catch(() => { setError('서버에 연결할 수 없습니다.'); setLoading(false) })
   }, [])
 
   return (
@@ -17,6 +23,7 @@ export default function Home() {
         <Link href="/admin"><button className="btn-primary">+ 투표 만들기</button></Link>
       </div>
       <h1>투표 목록</h1>
+      {error && <div className="msg msg-error">{error}</div>}
       {loading && <p>불러오는 중...</p>}
       {!loading && polls.length === 0 && (
         <div className="card"><p>아직 투표가 없습니다.</p></div>
